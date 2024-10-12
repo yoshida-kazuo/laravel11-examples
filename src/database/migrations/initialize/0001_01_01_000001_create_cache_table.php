@@ -11,16 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cache', function (Blueprint $table) {
-            $table->string('key')->primary();
-            $table->mediumText('value');
-            $table->integer('expiration');
+        Schema::create(table: 'cache', callback: function (Blueprint $table) {
+            $table->string(column: 'key')
+                ->primary()
+                ->comment(comment: 'キー');
+            $table->mediumText(column: 'value')
+                ->comment(comment: '値');
+            $table->integer(column: 'expiration')
+                ->comment(comment: '有効期限');
         });
 
-        Schema::create('cache_locks', function (Blueprint $table) {
-            $table->string('key')->primary();
-            $table->string('owner');
-            $table->integer('expiration');
+        Schema::create(table: 'cache_locks', callback: function (Blueprint $table) {
+            $table->string(column: 'key')
+                ->primary()
+                ->comment(comment: 'キー');
+            $table->string(column: 'owner')
+                ->comment(comment: '所有者');
+            $table->integer(column: 'expiration')
+                ->comment(comment: '有効期限');
         });
     }
 
@@ -29,7 +37,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cache');
-        Schema::dropIfExists('cache_locks');
+        Schema::dropIfExists(table: 'cache');
+        Schema::dropIfExists(table: 'cache_locks');
     }
 };

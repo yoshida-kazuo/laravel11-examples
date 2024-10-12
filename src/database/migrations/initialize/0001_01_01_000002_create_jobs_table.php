@@ -11,37 +11,69 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('jobs', function (Blueprint $table) {
-            $table->id();
-            $table->string('queue')->index();
-            $table->longText('payload');
-            $table->unsignedTinyInteger('attempts');
-            $table->unsignedInteger('reserved_at')->nullable();
-            $table->unsignedInteger('available_at');
-            $table->unsignedInteger('created_at');
+        Schema::create(table: 'jobs', callback: function (Blueprint $table) {
+            $table->id()
+                ->comment(comment: 'ID');
+            $table->string(column: 'queue')
+                ->index()
+                ->comment(comment: 'キュー');
+            $table->longText(column: 'payload')
+                ->comment(comment: 'ペイロード');
+            $table->unsignedTinyInteger(column: 'attempts')
+                ->comment(comment: '試行回数');
+            $table->unsignedInteger(column: 'reserved_at')
+                ->nullable()
+                ->comment(comment: '予約日時');
+            $table->unsignedInteger(column: 'available_at')
+                ->comment(comment: '利用可能日時');
+            $table->unsignedInteger(column: 'created_at')
+                ->comment(comment: '作成日時');
         });
 
-        Schema::create('job_batches', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->string('name');
-            $table->integer('total_jobs');
-            $table->integer('pending_jobs');
-            $table->integer('failed_jobs');
-            $table->longText('failed_job_ids');
-            $table->mediumText('options')->nullable();
-            $table->integer('cancelled_at')->nullable();
-            $table->integer('created_at');
-            $table->integer('finished_at')->nullable();
+        Schema::create(table: 'job_batches', callback: function (Blueprint $table) {
+            $table->string(column: 'id')
+                ->primary()
+                ->comment(comment: 'ID');
+            $table->string(column: 'name')
+                ->comment(comment: '名前');
+            $table->integer(column: 'total_jobs')
+                ->comment(comment: '合計ジョブ数');
+            $table->integer(column: 'pending_jobs')
+                ->comment(comment: '保留中ジョブ数');
+            $table->integer(column: 'failed_jobs')
+                ->comment(comment: '失敗ジョブ数');
+            $table->longText(column: 'failed_job_ids')
+                ->comment(comment: '失敗ジョブID');
+            $table->mediumText(column: 'options')
+                ->nullable()
+                ->comment(comment: 'オプション');
+            $table->integer(column: 'cancelled_at')
+                ->nullable()
+                ->comment(comment: 'キャンセル日時');
+            $table->integer(column: 'created_at')
+                ->comment(comment: '作成日時');
+            $table->integer(column: 'finished_at')
+                ->nullable()
+                ->comment(comment: '完了日時');
         });
 
-        Schema::create('failed_jobs', function (Blueprint $table) {
-            $table->id();
-            $table->string('uuid')->unique();
-            $table->text('connection');
-            $table->text('queue');
-            $table->longText('payload');
-            $table->longText('exception');
-            $table->timestamp('failed_at')->useCurrent();
+        Schema::create(table: 'failed_jobs', callback: function (Blueprint $table) {
+            $table->id()
+                ->comment(comment: 'ID');
+            $table->string(column: 'uuid')
+                ->unique()
+                ->comment(comment: 'UUID');
+            $table->text(column: 'connection')
+                ->comment(comment: '接続');
+            $table->text(column: 'queue')
+                ->comment(comment: 'キュー');
+            $table->longText(column: 'payload')
+                ->comment(comment: 'ペイロード');
+            $table->longText(column: 'exception')
+                ->comment(comment: '例外');
+            $table->timestamp(column: 'failed_at')
+                ->useCurrent()
+                ->comment(comment: '失敗日時');
         });
     }
 
@@ -50,8 +82,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('jobs');
-        Schema::dropIfExists('job_batches');
-        Schema::dropIfExists('failed_jobs');
+        Schema::dropIfExists(table: 'jobs');
+        Schema::dropIfExists(table: 'job_batches');
+        Schema::dropIfExists(table: 'failed_jobs');
     }
 };
