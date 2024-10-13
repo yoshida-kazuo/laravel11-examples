@@ -66,6 +66,7 @@ return [
     */
 
     'timezone' => env('APP_TIMEZONE', 'UTC'),
+    'timezone_view' => env('APP_TIMEZONE_VIEW', 'UTC'),
 
     /*
     |--------------------------------------------------------------------------
@@ -122,5 +123,39 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    */
+
+    'version' => env('APP_VERSION', '0.1'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Social login email domain
+    |--------------------------------------------------------------------------
+    */
+
+    'user_dummy_email_domain' => env('APP_USER_DUMMY_EMAIL_DOMAIN', 'example.jp'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | A flag indicating whether registration is allowed
+    |--------------------------------------------------------------------------
+    */
+
+    'enable_registration' => env('APP_ENABLE_REGISTRATION', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Maintenance settings allow you to specify the IP addresses permitted for access.
+    | If you want to set multiple addresses, you need to separate them with commas.
+    |--------------------------------------------------------------------------
+    */
+
+    'enable_maintenance'    => env('APP_ENABLE_MAINTENANCE', false),
+    'maintenance_ipaddress' => env('APP_MAINTENANCE_IPADDRESS', '127.0.0.1'),
 
 ];
