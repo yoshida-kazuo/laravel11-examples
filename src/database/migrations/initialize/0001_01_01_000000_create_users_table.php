@@ -35,6 +35,7 @@ return new class extends Migration
                 ->index()
                 ->comment(comment: 'ログイン禁止日時');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create(table: 'password_reset_tokens', callback: function (Blueprint $table) {

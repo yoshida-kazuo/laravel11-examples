@@ -23,3 +23,6 @@ Homestead.json
 .phpunit.result.cache
 
 .vscode
+.venv
+.python-version
+/src/bootstrap/ssr
