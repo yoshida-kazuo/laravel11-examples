@@ -30,10 +30,12 @@ docker network list
 ```sh
 docker compose up -d --build
 docker compose exec web composer install
+dcexec compose exec -e HOME=/tmp web npm install
 docker compose exec web php artisan key:generate
 # src/.env 適宜設定しmigration実行
 docker compose exec web php artisan migrate --path=database/migrations/initialize
 docker compose exec web php artisan db:seed --class=InitializeSeeder
+docker compose exec web php artisan user:create <email> <password>
 docker compose exec web npm install
 docker compose exec web npm run dev
 ```
