@@ -31,10 +31,14 @@ RUN apt update && \
                 libfreetype6-dev \
                 zip \
                 libzip-dev \
+                libz-dev \
+                libavif-dev \
+                libxpm-dev \
                 libjpeg-dev \
                 libmcrypt-dev \
                 imagemagick \
                 libmagickwand-dev \
+                libmagickcore-dev \
                 supervisor \
                 poppler-utils \
                 python3-venv \
@@ -64,23 +68,15 @@ RUN apt update && \
 RUN mkdir -p /usr/src/php/ext
 WORKDIR /usr/src/php/ext
 
-RUN pecl bundle xdebug && \
-        pecl bundle igbinary && \
-        pecl install igbinary && \
-        pecl bundle redis && \
-        pecl bundle mcrypt && \
-        pecl bundle imagick && \
-        docker-php-ext-configure redis \
-                --enable-redis-igbinary \
-                --enable-redis-lzf && \
-        docker-php-ext-install pdo_mysql && \
-        docker-php-ext-install zip && \
-        docker-php-ext-install gd && \
-        docker-php-ext-install redis && \
-        docker-php-ext-install xdebug && \
-        docker-php-ext-install mcrypt && \
-        docker-php-ext-install imagick && \
-        docker-php-ext-install opcache
+# TODO: Add Imagick installation once it fully supports PHP 8.4.
+# Imagick currently has compatibility issues with PHP 8.4, so it will be added
+# after a stable version with PHP 8.4 support is released.
+RUN pecl install igbinary-3.2.16
+RUN pecl install redis-6.1.0 --enable-redis-igbinary --enable-redis-lzf
+RUN pecl install xdebug-3.4.0
+RUN docker-php-ext-configure gd --with-avif --with-jpeg --with-xpm --with-webp
+RUN docker-php-ext-install pdo_mysql opcache zip gd
+RUN docker-php-ext-enable igbinary redis xdebug
 
 RUN find /etc -type f -path "*/ImageMagick-*" -name "policy.xml" -exec sed -i.orig 's/policy domain="coder" rights="none" pattern="PDF"/policy domain="coder" rights="read|write" pattern="PDF"/g' {} + && \
         find /etc -type f -path "*/ImageMagick-*" -name "policy.xml" -exec sed -i.orig 's/<policy domain="resource" name="memory" value="256MiB"\/>/<policy domain="resource" name="memory" value="1GiB"\/>/g' {} + && \
@@ -103,55 +99,6 @@ WORKDIR /etc/cron.d
 RUN echo "* * * * * cd ${APP_SERVER_PATH} && /usr/local/bin/php -d memory_limit=-1 artisan schedule:run" > laravel && \
         chmod 0644 ./laravel && \
         crontab -u ${APP_USER} laravel
-
-
-
-# RUN rm -rf /opt/data/.venv
-# WORKDIR /opt/data
-# RUN sed -i '/Components:/ s/$/ contrib/' /etc/apt/sources.list.d/debian.sources
-# # RUN apt update && \
-# #         apt install -y \
-# #                 open-jtalk \
-# #                 open-jtalk-mecab-naist-jdic \
-# #                 hts-voice-nitech-jp-atr503-m001 \
-# #                 espeak && \
-# #         apt clean && \
-# #         rm -rf /var/lib/apt/lists/*
-# ENV USE_NNPACK 0
-# RUN python3 -m venv /opt/data/.venv
-# RUN /opt/data/.venv/bin/python -m pip install --upgrade pip
-# ENV PATH /opt/data/.venv/bin:$PATH
-# # RUN curl -sSfL https://github.com/VOICEVOX/voicevox_core/releases/latest/download/download-linux-x64 -o download
-# # RUN chmod +x download
-# # RUN ./download -o .venv/lib
-# ENV LD_LIBRARY_PATH /opt/data/.venv/lib:$LD_LIBRARY_PATH
-# RUN pip install fire
-# # RUN pip install https://github.com/VOICEVOX/voicevox_core/releases/download/0.14.5/voicevox_core-0.14.5+cpu-cp38-abi3-linux_x86_64.whl \
-# #         openai-whisper \
-# #         TTS
-# RUN pip install opencv-python \
-#         opencv-contrib-python \
-#         easyocr \
-#         PyMuPDF \
-#         paddlepaddle \
-#         paddleocr
-
-# RUN echo "deb https://notesalexp.org/tesseract-ocr5/$(lsb_release -cs)/ $(lsb_release -cs) main" \
-#                 | tee /etc/apt/sources.list.d/notesalexp.list > /dev/null
-# RUN curl -s https://notesalexp.org/debian/alexp_key.asc | apt-key add - && \
-#         apt update && \
-#         apt install -y tesseract-ocr \
-#                 libtesseract-dev && \
-#         apt clean && \
-#         rm -rf /var/lib/apt/lists/*
-# RUN mkdir /opt/data/cache
-# ENV HF_HOME /opt/data/cache
-# RUN usermod -d /opt/data ${APP_USER}
-# RUN mkdir /opt/data/.EasyOCR
-# RUN chown ${APP_USER} /opt/data /opt/data/cache /opt/data/.EasyOCR
-
-
-
 WORKDIR /tmp
 COPY etc/php/www.conf /tmp/www.conf.template
 RUN envsubst < /tmp/www.conf.template > /usr/local/etc/php-fpm.d/www.conf
