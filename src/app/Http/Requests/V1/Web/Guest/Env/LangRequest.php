@@ -6,7 +6,6 @@ use App\Http\Requests\V1\Web\AjaxRequest;
 
 class LangRequest extends AjaxRequest
 {
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -28,5 +27,4 @@ class LangRequest extends AjaxRequest
             //
         ];
     }
-
 }
