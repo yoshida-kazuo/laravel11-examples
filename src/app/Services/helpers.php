@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Str;
 use Illuminate\Encryption\Encrypter;
-use App\Lib\Support\Activity\ActivitySupport;
+use App\Repositories\ActivityRepository;
 
 if (! function_exists('activity')) {
     /**
@@ -17,7 +17,7 @@ if (! function_exists('activity')) {
         ?string $message = null,
         ?string $type = null
     ) {
-        $activity = app(ActivitySupport::class);
+        $activity = app(ActivityRepository::class);
 
         if (isset($message)
             && isset($type)

@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\ApplicationManager::class,
         ])
         ->alias([
+            'account.ban'   => \App\Http\Middleware\AccountBan::class,
             'app.manager'   => \App\Http\Middleware\ApplicationManager::class,
         ])
         ->priority([
