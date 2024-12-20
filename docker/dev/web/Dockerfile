@@ -68,9 +68,6 @@ RUN apt update && \
 RUN mkdir -p /usr/src/php/ext
 WORKDIR /usr/src/php/ext
 
-# TODO: Add Imagick installation once it fully supports PHP 8.4.
-# Imagick currently has compatibility issues with PHP 8.4, so it will be added
-# after a stable version with PHP 8.4 support is released.
 RUN pecl install igbinary-3.2.16
 RUN pecl install redis-6.1.0 --enable-redis-igbinary --enable-redis-lzf
 RUN pecl install xdebug-3.4.0
@@ -83,6 +80,19 @@ RUN find /etc -type f -path "*/ImageMagick-*" -name "policy.xml" -exec sed -i.or
         find /etc -type f -path "*/ImageMagick-*" -name "policy.xml" -exec sed -i.orig 's/<policy domain="resource" name="map" value="512MiB"\/>/<policy domain="resource" name="map" value="2GiB"\/>/g' {} +
 
 WORKDIR /tmp
+# TODO: Add Imagick installation once it fully supports PHP 8.4.
+# Imagick currently has compatibility issues with PHP 8.4, so it will be added
+# after a stable version with PHP 8.4 support is released.
+RUN curl -L -o /tmp/imagick.tar.gz https://github.com/Imagick/imagick/archive/tags/3.7.0.tar.gz && \
+        mkdir -p /tmp/imagick && \
+        tar --strip-components=1 -xzf /tmp/imagick.tar.gz -C /tmp/imagick  && \
+        cd /tmp/imagick && \
+        phpize && \
+        ./configure && \
+        make && \
+        make install && \
+        rm -rf /tmp/*
+
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
         curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
         bash n ${APP_NODE_VERSION} && \
