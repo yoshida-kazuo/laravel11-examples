@@ -10,7 +10,6 @@ Laravel 11 Sample Code
 # APP_USER: uid名
 # APP_USER_ID: uid
 # APP_NETWORK: docker network list [NAME]
-# APP_IP_ADDRESS: 適宜IPアドレスを設定する
 cp .env-example .env
 ```
 ネットワーク作成サンプル
@@ -28,14 +27,14 @@ docker network list
 
 ## インストール
 ```sh
-docker compose up -d --build
-docker compose exec web composer install
-dcexec compose exec -e HOME=/tmp web npm install
-docker compose exec web php artisan key:generate
+docker compose build backend
+docker compose build frontend
+docker compose run --rm frontend npm install
+docker compose up -d backend
+docker compose exec backend php artisan key:generate
 # src/.env 適宜設定しmigration実行
-docker compose exec web php artisan migrate --path=database/migrations/initialize
-docker compose exec web php artisan db:seed --class=InitializeSeeder
-docker compose exec web php artisan user:create <email> <password>
-docker compose exec web npm install
-docker compose exec web npm run dev
+docker compose exec backend php artisan migrate --path=database/migrations/initialize
+docker compose exec backend php artisan db:seed --class=InitializeSeeder
+docker compose exec backend php artisan user:create <email> <password>
+docker compose up -d frontend
 ```
