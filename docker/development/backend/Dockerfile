@@ -1,28 +1,28 @@
-ARG APP_BUILD_IMAGE
+ARG APP_BACKEND_BUILD_IMAGE
 
-FROM ${APP_BUILD_IMAGE}
+FROM ${APP_BACKEND_BUILD_IMAGE}
 
-ARG APP_BUILD_ENV
-ARG APP_NODE_VERSION
 ARG APP_GROUP
 ARG APP_GROUP_ID
 ARG APP_USER
-ENV APP_USER=${APP_USER}
 ARG APP_USER_ID
-ARG APP_SERVER_PATH
-ENV APP_SERVER_PATH=${APP_SERVER_PATH}
-ARG APP_SERVER_DOCUMENT_PATH
-ENV APP_SERVER_DOCUMENT_PATH=${APP_SERVER_DOCUMENT_PATH}
-ARG APP_PHP_MEMORY_LIMIT
-ENV APP_PHP_MEMORY_LIMIT=${APP_PHP_MEMORY_LIMIT}
-ARG APP_XDEBUG_CLIENT_HOST
-ENV APP_XDEBUG_CLIENT_HOST=${APP_XDEBUG_CLIENT_HOST}
-ARG APP_XDEBUG_CLIENT_PORT
-ENV APP_XDEBUG_CLIENT_PORT=${APP_XDEBUG_CLIENT_PORT}
-ARG APP_XDEBUG_IDEKEY
-ENV APP_XDEBUG_IDEKEY=${APP_XDEBUG_IDEKEY}
-ARG APP_HOST_NAME
-ENV APP_HOST_NAME=${APP_HOST_NAME}
+ARG APP_BACKEND_BUILD_ENV
+ARG APP_BACKEND_SERVER_PATH
+ARG APP_BACKEND_SERVER_DOCUMENT_PATH
+ARG APP_BACKEND_PHP_MEMORY_LIMIT
+ARG APP_BACKEND_XDEBUG_CLIENT_HOST
+ARG APP_BACKEND_XDEBUG_CLIENT_PORT
+ARG APP_BACKEND_XDEBUG_IDEKEY
+ARG APP_BACKEND_HOST_NAME
+
+ENV APP_USER=${APP_USER}
+ENV APP_BACKEND_SERVER_PATH=${APP_BACKEND_SERVER_PATH}
+ENV APP_BACKEND_SERVER_DOCUMENT_PATH=${APP_BACKEND_SERVER_DOCUMENT_PATH}
+ENV APP_BACKEND_PHP_MEMORY_LIMIT=${APP_BACKEND_PHP_MEMORY_LIMIT}
+ENV APP_BACKEND_XDEBUG_CLIENT_HOST=${APP_BACKEND_XDEBUG_CLIENT_HOST}
+ENV APP_BACKEND_XDEBUG_CLIENT_PORT=${APP_BACKEND_XDEBUG_CLIENT_PORT}
+ENV APP_BACKEND_XDEBUG_IDEKEY=${APP_BACKEND_XDEBUG_IDEKEY}
+ENV APP_BACKEND_HOST_NAME=${APP_BACKEND_HOST_NAME}
 
 RUN apt update && \
         apt upgrade -y && \
@@ -93,33 +93,29 @@ RUN curl -L -o /tmp/imagick.tar.gz https://github.com/Imagick/imagick/archive/ta
         make install && \
         rm -rf /tmp/*
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
-        curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
-        bash n ${APP_NODE_VERSION} && \
-        npm install npm@latest -g && \
-        rm -rf /tmp/*
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN groupadd -g ${APP_GROUP_ID} ${APP_GROUP} && \
-        useradd -s /bin/false -u ${APP_USER_ID} -g ${APP_GROUP_ID} -M ${APP_USER}
+        useradd -s /bin/bash -u ${APP_USER_ID} -g ${APP_GROUP_ID} -M ${APP_USER}
 RUN mkdir -p /var/www && \
         chown -R ${APP_USER}:${APP_GROUP} /var/www && \
-        chown -R ${APP_USER}:${APP_GROUP} ${APP_SERVER_PATH}
+        chown -R ${APP_USER}:${APP_GROUP} ${APP_BACKEND_SERVER_PATH}
 
 WORKDIR /etc/cron.d
-RUN echo "* * * * * cd ${APP_SERVER_PATH} && /usr/local/bin/php -d memory_limit=-1 artisan schedule:run" > laravel && \
+RUN echo "* * * * * cd ${APP_BACKEND_SERVER_PATH} && /usr/local/bin/php -d memory_limit=-1 artisan schedule:run" > laravel && \
         chmod 0644 ./laravel && \
         crontab -u ${APP_USER} laravel
 WORKDIR /tmp
 COPY etc/php/www.conf /tmp/www.conf.template
 RUN envsubst < /tmp/www.conf.template > /usr/local/etc/php-fpm.d/www.conf
 COPY etc/nginx/nginx.conf /tmp/nginx.conf.template
-RUN envsubst '$$APP_USER $$APP_GROUP $$APP_HOST_NAME $$APP_SERVER_DOCUMENT_PATH' < /tmp/nginx.conf.template > /etc/nginx/nginx.conf
+RUN envsubst '$$APP_USER $$APP_GROUP $$APP_BACKEND_HOST_NAME $$APP_BACKEND_SERVER_DOCUMENT_PATH' < /tmp/nginx.conf.template > /etc/nginx/nginx.conf
 COPY etc/php/app.ini /tmp/app.ini.template
 RUN envsubst < /tmp/app.ini.template > /usr/local/etc/php/conf.d/app.ini
 COPY etc/supervisor/conf.d/worker.conf /tmp/worker.conf.template
 RUN envsubst < /tmp/worker.conf.template > /etc/supervisor/conf.d/worker.conf
 RUN rm -rf /tmp/*
 
-WORKDIR ${APP_SERVER_PATH}
+WORKDIR ${APP_BACKEND_SERVER_PATH}
 
 CMD ["/usr/bin/supervisord", "-n"]
