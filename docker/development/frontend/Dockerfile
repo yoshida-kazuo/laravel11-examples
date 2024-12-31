@@ -13,8 +13,13 @@ ENV APP_GROUP=${APP_GROUP}
 ENV NODE_PATH=/home/node/app/node_modules
 ENV PATH="${APP_FRONTEND_SERVER_PATH}/node_modules/.bin:$PATH"
 
-RUN groupadd -g ${APP_GROUP_ID} ${APP_GROUP} && \
-        useradd -s /bin/false -u ${APP_USER_ID} -g ${APP_GROUP_ID} -d ${APP_FRONTEND_SERVER_PATH} ${APP_USER}
+RUN if ! getent group | awk -F: '{print $3}' | grep -qw ${APP_GROUP_ID}; then \
+        groupadd -g ${APP_GROUP_ID} ${APP_GROUP}; \
+    fi
+
+RUN if ! getent passwd | awk -F: '{print $3}' | grep -qw ${APP_USER_ID}; then \
+        useradd -s /bin/false -u ${APP_USER_ID} -g ${APP_GROUP_ID} -d ${APP_FRONTEND_SERVER_PATH} ${APP_USER}; \
+    fi
 
 WORKDIR ${APP_FRONTEND_SERVER_PATH}
 RUN chown -R ${APP_USER}:${APP_GROUP} ${APP_FRONTEND_SERVER_PATH}
